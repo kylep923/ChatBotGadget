@@ -4,6 +4,7 @@
   <UserPref name="access_id" display_name="AWS Access ID" datatype="string" default_value="" required="true" />
   <UserPref name="secret_key" display_name="AWS Secret Key" datatype="string" default_value="" required="true"/>
   <UserPref name="bot_name" display_name="Name of Lex Bot" datatype="string" default_value="ScheduleAppointment"/>
+  <UserPref name="img_url" display_name="URL for button image" datatype="string" default_value="https://uploads.cdn.reveldigital.com/389153!talk%20icon4.png"/>
   <!-->
   <UserPref name="pulseColor" display_name="Pulse Color (hex value)" datatype="string" default_value="#02ffff"/>
   <UserPref name="pathWidth" display_name="Path Width (integer value)" datatype="string" default_value="3"/>
@@ -89,7 +90,7 @@
 <body class="wrapper">
     <div class="audio-control">
         <p id="audio-control" class="white-circle">
-            <img src="https://uploads.cdn.reveldigital.com/389153!talk%20icon4.png">
+            <img src="__UP_img_url__px">
             <canvas class="visualizer"></canvas>
         </p>
         <p><span id="message"></span></p>
@@ -187,7 +188,6 @@
         var AccessID = prefs.getString("access_id");
         var SecretKey = prefs.getString("secret_key");
         var BotName = prefs.getString("bot_name");
-
 
         AWS.config.region = 'us-east-1';
         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
