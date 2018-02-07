@@ -90,7 +90,7 @@
 <body class="wrapper">
     <div class="audio-control">
         <p id="audio-control" class="white-circle">
-            <img src="__UP_img_url__px">
+            <img src="__UP_img_url__">
             <canvas class="visualizer"></canvas>
         </p>
         <p><span id="message"></span></p>
