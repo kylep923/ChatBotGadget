@@ -40,10 +40,6 @@
             background-color: rgba(0, 0, 0, 0);
         }
         
-        .white-circle:hover {
-            box-shadow: 0 0 8px #007dbc;
-        }
-        
         .white-circle img {
             position: relative;
             height: 100%;
@@ -87,8 +83,8 @@
         <p id="audio-control" class="white-circle">
             <img src="__UP_img_url__">
             <canvas class="visualizer"></canvas>
+            <span id="message"></span>
         </p>
-        <p><span id="message"></span></p>
     </div>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.48.0.min.js"></script>
     <script src="https://cdn.rawgit.com/kylep923/ChatBotGadget/master/dist/aws-lex-audio.min.js" type="text/javascript"></script>
