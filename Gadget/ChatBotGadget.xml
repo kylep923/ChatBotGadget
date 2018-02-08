@@ -49,16 +49,16 @@
         .white-circle img {
             position: relative;
             height: 90%;
-            width: 100%;
-            top: 20px;
+            width: 90%;
+            top: 5%;
         }
         
         .audio-control {
             position: fixed;
-            top: 40%;
-            left: 45%;
-            margin-top: -50px;
-            margin-left: -50px;
+            top: 20%;
+            left: 20%;
+            right: 20%;
+            bottom: 20%;
             text-align: center;
         }
         
@@ -66,9 +66,14 @@
             font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
             line-height: 21px;
             color: #444;
-            font-size: 13px;
+            font-size: 20px;
             font-weight: 400;
             background-color: rgba(0, 0, 0, 0);
+        }
+        
+        .wrapper {
+            height: 100%;
+            width: 100%;
         }
         
         canvas {
