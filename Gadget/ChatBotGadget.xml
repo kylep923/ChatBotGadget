@@ -301,8 +301,8 @@
                 }
             }, function(data) {
                 console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
-                console.log(JSON.stringify(data.slots.LocationTypevalue));
                 if (typeof Client != 'undefined' && data.dialogState == "Fulfilled") {
+                    console.log(JSON.stringify(data.slots.LocationTypevalue));
                     console.log('client found');
                     Client.callback(data.slots.LocationTypevalue);
                 } else {
