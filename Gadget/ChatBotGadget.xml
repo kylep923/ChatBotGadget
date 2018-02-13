@@ -4,6 +4,7 @@
   <UserPref name="access_id" display_name="AWS Access ID" datatype="string" default_value="" required="true" />
   <UserPref name="secret_key" display_name="AWS Secret Key" datatype="string" default_value="" required="true"/>
   <UserPref name="bot_name" display_name="Name of Lex Bot" datatype="string" default_value="ScheduleAppointment"/>
+  <UserPref name="session_attributes" display_name="Lex Bot Session Attributes (CSV format -- 'name:value,name2:value2,...''" datatype="string" default_value=""/>
   <UserPref name="img_url" display_name="URL for button image" datatype="string" default_value="https://uploads.cdn.reveldigital.com/389153!talk%20icon4.png"/>
   <!-->
   <UserPref name="pulseColor" display_name="Pulse Color (hex value)" datatype="string" default_value="#02ffff"/>
@@ -179,6 +180,28 @@
         var AccessID = prefs.getString("access_id");
         var SecretKey = prefs.getString("secret_key");
         var BotName = prefs.getString("bot_name");
+        var SessionAttributes = prefs.getString("session_attributes");
+
+
+        function csvToJSON(csv) {
+            // Construct json string for session attributes
+            // ------------------------ FINISH & TEST THIS -----------------------------------
+            var session_attribute_array = [] = SessionAttributes.split(",");
+            var session_attribute_string = '{'
+            for (var x = 0; x < session_attribute_array.length; x++) {
+                var current_value = session_attribute_array[x].split(":");
+                var value_string = '"' + current_value[0] + '":"' + current_value[1] + '"';
+                if (x == session_attribute_array.length - 1) {
+                    session_attribute_string = session_attribute_string + value_string
+                } else {
+                    session_attribute_string = session_attribute_string + value_string + ",";
+                }
+            }
+            session_attribute_string = session_attribute_string + '}'
+            return session_attribute_string
+                //--------------------------------------------------------------------------------
+        }
+
 
         AWS.config.region = 'us-east-1';
         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -251,13 +274,9 @@
             AWS.config.credentials = new AWS.Credentials(AccessID, SecretKey, null);
             AWS.config.region = 'us-east-1';
 
-            config = {
-                lexConfig: {
-                    // pref here
-                    //sessionAttributes: sessionAttributes,
-                    botName: "ScheduleAppointment"
-                }
-            };
+            config_string = '{"lexConfig":{"sessionAttributes":' + csvToJSON(SessionAttributes) + ', "botName":"' + BotName + '"}}';
+            
+            config = JSON.parse(config_string);
 
             conversation = new LexAudio.conversation(config, function(state) {
                 message.textContent = state + '...';
