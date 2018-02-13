@@ -186,6 +186,9 @@
         function csvToJSON(csv) {
             // Construct json string for session attributes
             // ------------------------ FINISH & TEST THIS -----------------------------------
+            if (csv == "") {
+                return ""
+            }
             var session_attribute_array = [] = SessionAttributes.split(",");
             var session_attribute_string = '{'
             for (var x = 0; x < session_attribute_array.length; x++) {
