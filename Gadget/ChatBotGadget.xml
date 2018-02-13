@@ -187,7 +187,7 @@
             // Construct json string for session attributes
             // ------------------------ FINISH & TEST THIS -----------------------------------
             if (csv == "") {
-                return ""
+                return "{}"
             }
             var session_attribute_array = [] = SessionAttributes.split(",");
             var session_attribute_string = '{'
