@@ -262,7 +262,7 @@
                         wayfinding_obj = {};
                         wayfinding_obj['name'] = "wayfinding";
                         wayfinding_obj['arg'] = data.slots.LocationTypevalue;
-                        Client.callback(wayfinding_obj);
+                        Client.callback(JSON.stringify(wayfinding_obj));
                     }
                     if (data.slots.command_slot && data.slots.command_slot != "ERROR") {
                         console.log(JSON.stringify(data.slots.command_slot));
@@ -271,7 +271,7 @@
                         command_obj["name"] = "command";
                         var arg = data.slots.command_slot;
                         command_obj["arg"] = arg.toLowerCase();
-                        Client.callback(command_obj);
+                        Client.callback(JSON.stringify(command_obj));
                     }
                 } else {
                     console.log('client not found || slots undefined');
