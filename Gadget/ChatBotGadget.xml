@@ -206,64 +206,6 @@
         }
 
 
-        AWS.config.region = 'us-east-1';
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            // Provide your Pool Id here
-            IdentityPoolId: 'us-east-1:64b7df76-83e1-47b2-8c44-86d49e88978c',
-        });
-
-        var lexruntime = new AWS.LexRuntime();
-        var lexUserId = 'chatbot-demo' + Date.now();
-        var sessionAttributes = {};
-
-        function pushChat(text) {
-            params = globalLexConfig;
-            console.log(text);
-            //console.log(params);
-            // if there is text to be sent...
-            var wisdomText = text
-            if (wisdomText) {
-
-                /* send it to the Lex runtime
-                var params = {
-                    botAlias: '$LATEST',
-                    botName: 'ScheduleAppointment',
-                    inputText: wisdomText,
-                    userId: 'userId',
-                    //sessionAttributes: sessionAttributes
-                };
-                */
-                params.contentType = "text/plain; charset=utf-8"
-                params.inputStream = text;
-
-                console.log(JSON.stringify(params));
-
-                lexruntime.postContent(params, function(err, data) {
-                    if (err) {
-                        console.log('Error:  ' + err.message);
-                        console.log(err, err.stack);
-                        //showError('Error:  ' + err.message + ' (see console for details)')
-                    }
-                    if (data) {
-                        // capture the sessionAttributes for the next cycle
-                        //sessionAttributes = data.sessionAttributes;
-                        // show response and/or error/dialog status
-                        console.log(data);
-                        startConvo();
-                        //state.audioOutput = data;
-                        //return state;
-                        //state.transition(new Speaking(state));
-                        //state.onSuccess(data);
-                        //showResponse(data);
-                    }
-                    //re-enable input
-
-                });
-            }
-            // we always cancel form submission
-            return false;
-        }
-
         var waveform = window.Waveform();
         var message = document.getElementById('message');
         var config, conversation;
@@ -271,20 +213,29 @@
         var flag = false;
         var flag2 = false;
         var globalLexConfig;
+        var globalState = ''
         document.getElementById('audio-control').onclick = function() {
+
+            console.log('Current State: ' + globalState);
+            if (globalState === 'Listening' || globalState === 'Sending' || globalState === 'Speaking') {
+                console.log(globalState);
+                return;
+            }
 
             // prefs here
             AWS.config.credentials = new AWS.Credentials(AccessID, SecretKey, null);
             AWS.config.region = 'us-east-1';
 
             config_string = '{"lexConfig":{"sessionAttributes":' + csvToJSON(SessionAttributes) + ', "botName":"' + BotName + '"}}';
-            
+            //console.log(config_string);
             config = JSON.parse(config_string);
 
+
             conversation = new LexAudio.conversation(config, function(state) {
+                globalState = state;
                 message.textContent = state + '...';
-                console.log(state);
-                console.log(config['lexConfig'].inputStream);
+                //console.log(state);
+                //console.log(config['lexConfig'].inputStream);
                 globalLexConfig = config['lexConfig'];
                 if (state === 'Listening') {
                     waveform.prepCanvas();
@@ -304,12 +255,26 @@
                 }
             }, function(data) {
                 console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
-                if (typeof Client != 'undefined' && data.dialogState == "Fulfilled") {
-                    console.log(JSON.stringify(data.slots.LocationTypevalue));
-                    console.log('client found');
-                    Client.callback(data.slots.LocationTypevalue);
+                if (typeof Client != 'undefined' && data.slots != undefined) {
+                    if (data.slots.LocationTypevalue) {
+                        console.log(JSON.stringify(data.slots.LocationTypevalue));
+                        console.log('client found');
+                        wayfinding_obj = {};
+                        wayfinding_obj['name'] = "wayfinding";
+                        wayfinding_obj['arg'] = data.slots.LocationTypevalue;
+                        Client.callback(wayfinding_obj);
+                    }
+                    if (data.slots.command_slot && data.slots.command_slot != "ERROR") {
+                        console.log(JSON.stringify(data.slots.command_slot));
+                        console.log('command found');
+                        command_obj = {}
+                        command_obj["name"] = "command";
+                        var arg = data.slots.command_slot;
+                        command_obj["arg"] = arg.toLowerCase();
+                        Client.callback(command_obj);
+                    }
                 } else {
-                    console.log('client not found');
+                    console.log('client not found || slots undefined');
                 }
             }, function(error) {
                 message.textContent = error;
@@ -320,57 +285,6 @@
             conversation.advanceConversation();
         };
 
-        function startConvo() {
-            // prefs here
-            AWS.config.credentials = new AWS.Credentials(AccessID, SecretKey, null);
-            AWS.config.region = 'us-east-1';
-
-            config = {
-                lexConfig: {
-                    // pref here
-                    //sessionAttributes: sessionAttributes,
-                    botName: "ScheduleAppointment"
-                }
-            };
-
-            conversation = new LexAudio.conversation(config, function(state) {
-                message.textContent = state + '...';
-                console.log(state);
-                console.log(config['lexConfig'].inputStream);
-                globalLexConfig = config['lexConfig'];
-                if (state === 'Listening') {
-                    waveform.prepCanvas();
-                    if (flag) {
-                        //pushChat(config['lexConfig'], 'root canal');
-                        config['lexConfig'].contentType = "text/plain; charset=utf-8";
-                        config['lexConfig'].inputStream = null;
-                        console.log(conversation);
-                        flag = false;
-                        flag2 = true;
-                        waveform.clearCanvas();
-                        //config['lexConfig'].inputStream = 'root canal';
-                    }
-                }
-                if (state === 'Sending') {
-                    waveform.clearCanvas();
-                }
-            }, function(data) {
-                console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
-                console.log(JSON.stringify(data.slots.LocationTypevalue));
-                if (typeof Client != 'undefined' && data.dialogState == "Fulfilled") {
-                    console.log('client found');
-                    Client.callback(data.slots.LocationTypevalue);
-                } else {
-                    console.log('client not found');
-                }
-            }, function(error) {
-                message.textContent = error;
-                console.log(error);
-            }, function(timeDomain, bufferLength) {
-                waveform.visualizeAudioBuffer(timeDomain, bufferLength);
-            });
-            conversation.advanceConversation();
-        }
     </script>
 </body>
 

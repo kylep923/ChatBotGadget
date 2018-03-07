@@ -61,13 +61,14 @@
 <body class="wrapper">
     <div class="audio-control">
         <p id="audio-control" class="white-circle">
-            <img src="https://uploads.cdn.reveldigital.com/389153!talk%20icon4.png">
+            <!-- <img src="__UP_img_url__"> -->
             <canvas class="visualizer"></canvas>
             <span id="message"></span>
         </p>
     </div>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.48.0.min.js"></script>
     <script src="https://cdn.rawgit.com/kylep923/ChatBotGadget/master/dist/aws-lex-audio.min.js" type="text/javascript"></script>
+    <!-- <script src="https://cdn.rawgit.com/kylep923/ChatBotGadget/master/dist/aws-lex-audio.js" type="text/javascript"></script> -->
 
     <script type="text/javascript">
         (function() {
@@ -155,38 +156,105 @@
 
     <script type="text/javascript">
         //var prefs = new gadgets.Prefs();
-        var AccessID = "" //prefs.getString("access_id");
-        var SecretKey = "" //prefs.getString("secret_key");
-        var BotName = "" //prefs.getString("bot_name");
+        var AccessID = "AKIAICRWMJNS7TFGP62A"; //prefs.getString("access_id");
+        var SecretKey = "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"; //prefs.getString("secret_key");
+        var BotName = "ScheduleAppointment"; //prefs.getString("bot_name");
+        var SessionAttributes = "apiKey:8FYmwxXYXU_kd11xclK0HQ,gridName:WestAcersDemo"; //prefs.getString("session_attributes");
+
+
+        function csvToJSON(csv) {
+            // Construct json string for session attributes
+            // ------------------------ FINISH & TEST THIS -----------------------------------
+            if (csv == "") {
+                return ""
+            }
+            var session_attribute_array = [] = SessionAttributes.split(",");
+            var session_attribute_string = '{'
+            for (var x = 0; x < session_attribute_array.length; x++) {
+                var current_value = session_attribute_array[x].split(":");
+                var value_string = '"' + current_value[0] + '":"' + current_value[1] + '"';
+                if (x == session_attribute_array.length - 1) {
+                    session_attribute_string = session_attribute_string + value_string
+                } else {
+                    session_attribute_string = session_attribute_string + value_string + ",";
+                }
+            }
+            session_attribute_string = session_attribute_string + '}'
+            return session_attribute_string
+                //--------------------------------------------------------------------------------
+        }
+
 
         var waveform = window.Waveform();
         var message = document.getElementById('message');
         var config, conversation;
         message.textContent = 'Passive';
-
+        var flag = false;
+        var flag2 = false;
+        var globalLexConfig;
+        var globalState = ''
         document.getElementById('audio-control').onclick = function() {
+
+            console.log('Current State: ' + globalState);
+            if (globalState === 'Listening' || globalState === 'Sending' || globalState === 'Speaking') {
+                console.log(globalState);
+                return;
+            }
 
             // prefs here
             AWS.config.credentials = new AWS.Credentials(AccessID, SecretKey, null);
             AWS.config.region = 'us-east-1';
 
-            config = {
-                lexConfig: {
-                    // pref here
-                    botName: "ScheduleAppointment"
-                }
-            };
+            config_string = '{"lexConfig":{"sessionAttributes":' + csvToJSON(SessionAttributes) + ', "botName":"' + BotName + '"}}';
+            //console.log(config_string);
+            config = JSON.parse(config_string);
+
 
             conversation = new LexAudio.conversation(config, function(state) {
+                globalState = state;
                 message.textContent = state + '...';
+                //console.log(state);
+                //console.log(config['lexConfig'].inputStream);
+                globalLexConfig = config['lexConfig'];
                 if (state === 'Listening') {
                     waveform.prepCanvas();
+                    if (flag) {
+                        //pushChat(config['lexConfig'], 'root canal');
+                        config['lexConfig'].contentType = "text/plain; charset=utf-8";
+                        config['lexConfig'].inputStream = null;
+                        console.log(conversation);
+                        flag = false;
+                        flag2 = true;
+                        waveform.clearCanvas();
+                        //config['lexConfig'].inputStream = 'root canal';
+                    }
                 }
                 if (state === 'Sending') {
                     waveform.clearCanvas();
                 }
             }, function(data) {
-                console.log('Transcript: ', data.inputTranscript, ", Response: ", data.message);
+                console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
+                if (typeof Client != 'undefined' && data.slots != undefined) {
+                    if (data.slots.LocationTypevalue) {
+                        console.log(JSON.stringify(data.slots.LocationTypevalue));
+                        console.log('client found');
+                        wayfinding_obj = {};
+                        wayfinding_obj['name'] = "wayfinding";
+                        wayfinding_obj['arg'] = data.slots.LocationTypevalue;
+                        Client.callback(wayfinding_obj);
+                    }
+                    if (data.slots.command_slot && data.slots.command_slot != "ERROR") {
+                        console.log(JSON.stringify(data.slots.command_slot));
+                        console.log('command found');
+                        command_obj = {}
+                        command_obj["name"] = "command";
+                        var arg = data.slots.command_slot;
+                        command_obj["arg"] = arg.toLowerCase();
+                        Client.callback(command_obj);
+                    }
+                } else {
+                    console.log('client not found || slots undefined');
+                }
             }, function(error) {
                 message.textContent = error;
                 console.log(error);
