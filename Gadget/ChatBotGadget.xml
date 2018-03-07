@@ -257,12 +257,12 @@
                 console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
                 if (typeof Client != 'undefined' && data.slots != undefined) {
                     if (data.slots.LocationTypevalue) {
-                        var arg = "wayfinding, " + data.slots.LocationTypevalue;
-                        Client.callback(arg);
+                        var arg = data.slots.LocationTypevalue;
+                        Client.callback("wayfinding", arg);
                     }
                     if (data.slots.command_slot && data.slots.command_slot != "ERROR") {
-                        var arg = "command, " + data.slots.command_slot;
-                        Client.callback(arg);
+                        var arg = data.slots.command_slot;
+                        Client.callback("command", arg);
                     }
                 } else {
                     console.log('client not found || slots undefined');
