@@ -257,21 +257,12 @@
                 console.log('Transcript: ', JSON.stringify(data.inputTranscript), ", Response: ", JSON.stringify(data.message));
                 if (typeof Client != 'undefined' && data.slots != undefined) {
                     if (data.slots.LocationTypevalue) {
-                        console.log(JSON.stringify(data.slots.LocationTypevalue));
-                        console.log('client found');
-                        wayfinding_obj = {};
-                        wayfinding_obj['name'] = "wayfinding";
-                        wayfinding_obj['arg'] = data.slots.LocationTypevalue;
-                        Client.callback(JSON.stringify(wayfinding_obj));
+                        var arg = "wayfinding, " + data.slots.LocationTypevalue;
+                        Client.callback(arg);
                     }
                     if (data.slots.command_slot && data.slots.command_slot != "ERROR") {
-                        console.log(JSON.stringify(data.slots.command_slot));
-                        console.log('command found');
-                        command_obj = {}
-                        command_obj["name"] = "command";
-                        var arg = data.slots.command_slot;
-                        command_obj["arg"] = arg.toLowerCase();
-                        Client.callback(JSON.stringify(command_obj));
+                        var arg = "command, " + data.slots.command_slot;
+                        Client.callback(arg);
                     }
                 } else {
                     console.log('client not found || slots undefined');
